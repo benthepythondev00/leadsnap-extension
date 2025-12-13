@@ -30,6 +30,25 @@ function App() {
   const [showExport, setShowExport] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
+  // Apply theme to document
+  const applyTheme = useCallback((theme: 'light' | 'dark' | 'system') => {
+    const root = document.documentElement;
+    
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'light') {
+      root.classList.remove('dark');
+    } else {
+      // System preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }, []);
+
   // Load data
   const loadData = useCallback(async () => {
     try {
@@ -40,16 +59,27 @@ function App() {
       setLeads(leadsData);
       setSettings(settingsData);
       setView(settingsData.defaultView);
+      applyTheme(settingsData.theme);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applyTheme]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (settings?.theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme('system');
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [settings?.theme, applyTheme]);
 
   // Filter leads by search
   const filteredLeads = leads.filter(lead => {

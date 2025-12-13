@@ -71,6 +71,11 @@ export function extractWebsite(text: string): string | null {
  * This is a heuristic approach - looks for capitalized words at the beginning
  */
 export function extractName(text: string): string {
+  // Handle empty or whitespace-only input
+  if (!text || !text.trim()) {
+    return 'Unnamed Lead';
+  }
+  
   // Remove URLs, emails, and phone numbers first
   let cleaned = text
     .replace(URL_REGEX, '')
@@ -80,7 +85,7 @@ export function extractName(text: string): string {
   
   // Split into lines and take the first non-empty line
   const lines = cleaned.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  if (lines.length === 0) return text.substring(0, 50).trim();
+  if (lines.length === 0) return 'Unnamed Lead';
   
   const firstLine = lines[0];
   
@@ -131,7 +136,8 @@ export function extractName(text: string): string {
   }
   
   // Fallback: use first 50 chars of first line
-  return firstLine.substring(0, 50).trim() || 'Unnamed Lead';
+  const fallback = firstLine.substring(0, 50).trim();
+  return fallback || 'Unnamed Lead';
 }
 
 /**
