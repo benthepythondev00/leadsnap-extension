@@ -256,11 +256,12 @@ export const exportUtils = {
     ];
 
     // Helper to escape CSV fields (handles quotes and commas)
-    const escapeCSV = (field: string): string => {
-      if (field.includes('"') || field.includes(',') || field.includes('\n')) {
-        return field.replace(/"/g, '""');
+    const escapeCSV = (field: string | undefined | null): string => {
+      const str = field ?? '';
+      if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+        return str.replace(/"/g, '""');
       }
-      return field;
+      return str;
     };
 
     const rows = leads.map(lead => [
@@ -270,9 +271,9 @@ export const exportUtils = {
       escapeCSV(lead.phone),
       escapeCSV(lead.linkedIn),
       escapeCSV(lead.website),
-      lead.status,
+      lead.status || 'new',
       escapeCSV(lead.notes),
-      escapeCSV(lead.tags.join('; ')),
+      escapeCSV((lead.tags || []).join('; ')),
       escapeCSV(lead.sourceUrl),
       new Date(lead.createdAt).toISOString(),
       new Date(lead.updatedAt).toISOString(),
