@@ -1,7 +1,6 @@
 import ExtPay from 'extpay';
 
-// Initialize ExtPay with your extension ID
-// IMPORTANT: Replace 'leadsnap' with your actual ExtensionPay extension ID after registering
+// Initialize ExtPay with your extension ID (registered at extensionpay.com)
 const extpay = ExtPay('leadsnap');
 
 export interface UserPaymentStatus {
