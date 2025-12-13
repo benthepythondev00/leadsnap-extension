@@ -215,6 +215,7 @@ export const settingsOperations = {
 
   /**
    * Check if user can add more leads
+   * Note: Payment status is synced by background.ts onPaymentStatusChange listener
    */
   async canAddLead(): Promise<{ allowed: boolean; remaining: number; limit: number }> {
     const settings = await this.get();
@@ -254,17 +255,25 @@ export const exportUtils = {
       'Updated',
     ];
 
+    // Helper to escape CSV fields (handles quotes and commas)
+    const escapeCSV = (field: string): string => {
+      if (field.includes('"') || field.includes(',') || field.includes('\n')) {
+        return field.replace(/"/g, '""');
+      }
+      return field;
+    };
+
     const rows = leads.map(lead => [
-      lead.name,
-      lead.email,
-      lead.company,
-      lead.phone,
-      lead.linkedIn,
-      lead.website,
+      escapeCSV(lead.name),
+      escapeCSV(lead.email),
+      escapeCSV(lead.company),
+      escapeCSV(lead.phone),
+      escapeCSV(lead.linkedIn),
+      escapeCSV(lead.website),
       lead.status,
-      lead.notes.replace(/"/g, '""'), // Escape quotes
-      lead.tags.join('; '),
-      lead.sourceUrl,
+      escapeCSV(lead.notes),
+      escapeCSV(lead.tags.join('; ')),
+      escapeCSV(lead.sourceUrl),
       new Date(lead.createdAt).toISOString(),
       new Date(lead.updatedAt).toISOString(),
     ]);

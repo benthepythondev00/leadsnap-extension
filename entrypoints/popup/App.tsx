@@ -68,18 +68,29 @@ function App() {
 
   // Handlers
   const handleSaveLead = async (data: CreateLeadInput | UpdateLeadInput) => {
-    if (editingLead) {
-      await leadOperations.update(editingLead.id, data as UpdateLeadInput);
-    } else {
-      await leadOperations.create(data as CreateLeadInput);
+    try {
+      if (editingLead) {
+        await leadOperations.update(editingLead.id, data as UpdateLeadInput);
+      } else {
+        await leadOperations.create(data as CreateLeadInput);
+      }
+      await loadData();
+    } catch (error) {
+      console.error('Failed to save lead:', error);
+      throw error; // Re-throw so LeadForm can show error
     }
-    await loadData();
   };
 
   const handleDeleteLead = async (id: string) => {
-    if (confirm('Delete this lead?')) {
-      await leadOperations.delete(id);
-      await loadData();
+    // Note: confirm() works in extension popups, but we use it directly
+    const confirmed = window.confirm('Delete this lead?');
+    if (confirmed) {
+      try {
+        await leadOperations.delete(id);
+        await loadData();
+      } catch (error) {
+        console.error('Failed to delete lead:', error);
+      }
     }
   };
 

@@ -1,6 +1,6 @@
 import { leadOperations, settingsOperations } from '../src/lib/storage';
 import { parseSelection } from '../src/lib/parser';
-import { startPaymentBackgroundListener, isPro } from '../src/lib/payment';
+import { startPaymentBackgroundListener, onPaymentStatusChange } from '../src/lib/payment';
 import type { CreateLeadInput } from '../src/types/lead';
 
 // Context menu ID
@@ -9,6 +9,14 @@ const CONTEXT_MENU_ID = 'leadsnap-capture';
 export default defineBackground(() => {
   // Start ExtensionPay background listener
   startPaymentBackgroundListener();
+
+  // Listen for payment status changes and sync to settings
+  onPaymentStatusChange(async (user) => {
+    if (user.paid) {
+      await settingsOperations.update({ isPro: true });
+      console.log('LeadSnap: User upgraded to Pro!');
+    }
+  });
 
   // Create context menu on install
   browser.runtime.onInstalled.addListener(() => {
@@ -46,6 +54,22 @@ export default defineBackground(() => {
       if (info.selectionText) {
         // Parse selected text
         leadInput = parseSelection(info.selectionText, sourceUrl);
+        
+        // Auto-detect LinkedIn profile from source URL
+        if (sourceUrl.includes('linkedin.com/in/') && !leadInput.linkedIn) {
+          leadInput.linkedIn = sourceUrl.split('?')[0]; // Remove query params
+          
+          // For LinkedIn, save the full selected text as notes if it contains more than just the name
+          // This captures the headline/title
+          const selectedText = info.selectionText.trim();
+          if (selectedText.length > leadInput.name.length + 5) {
+            // Extract headline (everything after the name)
+            const headline = selectedText.replace(leadInput.name, '').trim();
+            if (headline && !leadInput.notes) {
+              leadInput.notes = headline;
+            }
+          }
+        }
       } else if (info.linkUrl) {
         // Capture link
         leadInput = {

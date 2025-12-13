@@ -11,7 +11,7 @@ export default defineConfig({
     name: 'LeadSnap - Simple Lead Capture & CRM',
     description: 'Capture leads from any website with one click. Simple CRM for freelancers.',
     version: '1.0.0',
-    permissions: ['storage', 'contextMenus', 'activeTab'],
+    permissions: ['storage', 'contextMenus', 'activeTab', 'notifications'],
     action: {
       default_title: 'LeadSnap',
     },
@@ -22,5 +22,13 @@ export default defineConfig({
       '96': 'icon/96.png',
       '128': 'icon/128.png',
     },
+    // Required for ExtPay onPaid callback to work
+    content_scripts: [
+      {
+        matches: ['https://extensionpay.com/*'],
+        js: ['extpay-content.js'],
+        run_at: 'document_start',
+      },
+    ],
   },
 });

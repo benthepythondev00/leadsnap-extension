@@ -6,9 +6,10 @@ import type { CreateLeadInput } from '../types/lead';
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
 /**
- * Phone regex patterns (various formats)
+ * Phone regex patterns (various formats - international support)
+ * Matches: +1 555 123 4567, (555) 123-4567, +49 123 456789, +44 20 7946 0958, etc.
  */
-const PHONE_REGEX = /(?:\+?1[-.\s]?)?(?:\([0-9]{3}\)|[0-9]{3})[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g;
+const PHONE_REGEX = /(?:\+[1-9]\d{0,2}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}(?:[-.\s]?\d{1,4})?/g;
 
 /**
  * LinkedIn profile URL pattern
@@ -90,10 +91,43 @@ export function extractName(text: string): string {
     return nameMatch[1].trim().substring(0, 100);
   }
   
-  // Look for capitalized words (potential names)
-  const capitalizedWords = firstLine.match(/[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/);
-  if (capitalizedWords && capitalizedWords[0].length > 2) {
-    return capitalizedWords[0].substring(0, 100);
+  // Common words that shouldn't be part of a name (German, English, etc.)
+  const stopWords = new Set([
+    'ich', 'i', 'we', 'wir', 'the', 'der', 'die', 'das', 'und', 'and', 'or', 'oder',
+    'at', 'bei', 'in', 'for', 'für', 'with', 'mit', 'to', 'zu', 'von', 'from',
+    'help', 'helfe', 'helping', 'working', 'building', 'creating', 'leading',
+    'ceo', 'cto', 'cfo', 'coo', 'founder', 'co-founder', 'cofounder',
+    'manager', 'director', 'head', 'lead', 'senior', 'junior', 'chief',
+    'engineer', 'developer', 'designer', 'consultant', 'specialist', 'expert',
+    'software', 'product', 'project', 'marketing', 'sales', 'business',
+  ]);
+  
+  // Look for 2-4 consecutive capitalized words that form a name
+  // Stop when we hit a stop word or common job title indicator
+  const words = firstLine.split(/\s+/);
+  const nameWords: string[] = [];
+  
+  for (const word of words) {
+    // Check if word starts with capital letter (including Unicode letters)
+    // Matches: José, François, Müller, Øyvind, O'Brien, Joe's, etc.
+    if (/^[\p{Lu}][\p{Ll}''\-]+$/u.test(word) || /^[\p{Lu}][\p{Ll}]*$/u.test(word)) {
+      // Remove trailing punctuation for stop word check
+      const cleanWord = word.replace(/[''\-].*$/, '').replace(/[^\p{L}]/gu, '');
+      // Check if it's a stop word
+      if (stopWords.has(cleanWord.toLowerCase())) {
+        break; // Stop collecting name words
+      }
+      nameWords.push(word);
+      // Most names are 2-4 words max
+      if (nameWords.length >= 4) break;
+    } else if (nameWords.length > 0) {
+      // We had name words but hit a non-capitalized word or special char
+      break;
+    }
+  }
+  
+  if (nameWords.length >= 1) {
+    return nameWords.join(' ').substring(0, 100);
   }
   
   // Fallback: use first 50 chars of first line
@@ -137,10 +171,30 @@ export function extractCompany(text: string, url?: string): string {
 export function parseSelection(text: string, sourceUrl: string): CreateLeadInput {
   const email = extractEmail(text);
   const phone = extractPhone(text);
-  const linkedIn = extractLinkedIn(text);
-  const website = extractWebsite(text);
+  let linkedIn = extractLinkedIn(text);
+  let website = extractWebsite(text);
   const name = extractName(text);
   const company = extractCompany(text, sourceUrl);
+  
+  // Auto-detect LinkedIn from source URL if not found in text
+  if (!linkedIn && sourceUrl.includes('linkedin.com/in/')) {
+    linkedIn = sourceUrl.split('?')[0]; // Remove query params
+  }
+  
+  // Auto-detect website from source URL
+  // For social sites, keep the URL as sourceUrl only (not website field)
+  // For regular websites, also set it as the website field
+  if (!website && sourceUrl) {
+    const socialSites = ['linkedin.com', 'twitter.com', 'facebook.com', 'instagram.com', 'x.com', 'tiktok.com', 'youtube.com'];
+    const isSocialSite = socialSites.some(site => sourceUrl.includes(site));
+    
+    // GitHub is special - it's both a social profile AND a useful website link
+    if (sourceUrl.includes('github.com/') && !sourceUrl.includes('github.com/search')) {
+      website = sourceUrl.split('?')[0];
+    } else if (!isSocialSite) {
+      website = sourceUrl.split('?')[0];
+    }
+  }
   
   return {
     name,

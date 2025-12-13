@@ -130,7 +130,7 @@ export function SettingsModal({ onClose, onSettingsChange }: SettingsModalProps)
                          disabled:opacity-70 disabled:cursor-not-allowed
                          flex items-center justify-center gap-2"
               >
-                {loadingPayment ? 'Opening...' : 'Upgrade to Pro - $9/month'}
+                {loadingPayment ? 'Opening...' : 'Upgrade to Pro - $9.99 (Lifetime)'}
                 <ExternalLink className="w-4 h-4" />
               </button>
             )}

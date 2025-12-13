@@ -108,12 +108,15 @@ export function LeadCard({ lead, onEdit, onDelete, onStatusChange, compact = fal
             </button>
             <button
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                console.log('Delete clicked for lead:', lead.id);
                 onDelete(lead.id);
               }}
               className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 
                        rounded-md transition-colors"
               title="Delete"
+              type="button"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -168,7 +171,15 @@ export function LeadCard({ lead, onEdit, onDelete, onStatusChange, compact = fal
                        transition-colors group/link"
             >
               <Globe className="w-4 h-4 text-slate-400 group-hover/link:text-indigo-500" />
-              <span className="truncate">{new URL(lead.website).hostname}</span>
+              <span className="truncate">
+                {(() => {
+                  try {
+                    return new URL(lead.website).hostname;
+                  } catch {
+                    return lead.website.substring(0, 30);
+                  }
+                })()}
+              </span>
               <ExternalLink className="w-3 h-3 opacity-0 group-hover/link:opacity-100 transition-opacity" />
             </a>
           )}

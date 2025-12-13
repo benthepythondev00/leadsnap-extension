@@ -510,4 +510,232 @@ describe('Real-world parsing scenarios', () => {
       expect(result.name).toBe('John Smith');
     });
   });
+
+  describe('International names and characters', () => {
+    it('parses French name with accents', () => {
+      const text = `François Müller - CEO at TechFR`;
+      const result = parseSelection(text, 'https://techfr.com');
+      expect(result.name).toContain('François');
+    });
+
+    it('parses Spanish name with accents', () => {
+      const text = `José García Rodriguez
+        Product Manager
+        jose@empresa.es`;
+      const result = parseSelection(text, 'https://empresa.es');
+      expect(result.name).toContain('José');
+      expect(result.email).toBe('jose@empresa.es');
+    });
+
+    it('parses Irish name with apostrophe', () => {
+      const text = `Patrick O'Brien
+        Software Engineer
+        patrick.obrien@company.ie`;
+      const result = parseSelection(text, 'https://company.ie');
+      expect(result.name).toContain("O'Brien");
+    });
+
+    it('parses hyphenated name', () => {
+      const text = `Marie-Claire Dubois
+        Designer at Studio Paris
+        marie-claire@studio.fr`;
+      const result = parseSelection(text, 'https://studio.fr');
+      expect(result.name).toContain('Marie-Claire');
+    });
+
+    it('parses Nordic name with special characters', () => {
+      const text = `Øyvind Åberg
+        Developer
+        oyvind@nordic.no`;
+      const result = parseSelection(text, 'https://nordic.no');
+      expect(result.name).toContain('Øyvind');
+    });
+
+    it('parses German name with umlauts', () => {
+      const text = `Jürgen Schröder
+        Geschäftsführer
+        juergen@firma.de`;
+      const result = parseSelection(text, 'https://firma.de');
+      expect(result.name).toContain('Jürgen');
+    });
+  });
+
+  describe('LinkedIn headline variations', () => {
+    it('stops at German pronouns in headline', () => {
+      const text = `Benjamin Thorstensen Ich helfe Software-Teams, KI zu nutzen`;
+      const result = parseSelection(text, 'https://linkedin.com/in/bthorstensen');
+      expect(result.name).toBe('Benjamin Thorstensen');
+      expect(result.name).not.toContain('Ich');
+    });
+
+    it('stops at English pronouns in headline', () => {
+      const text = `Sarah Johnson I help startups grow their revenue`;
+      const result = parseSelection(text, 'https://linkedin.com/in/sarahjohnson');
+      expect(result.name).toBe('Sarah Johnson');
+      expect(result.name).not.toContain('I help');
+    });
+
+    it('stops at job title words', () => {
+      const text = `Michael Chen Senior Software Engineer at Google`;
+      const result = parseSelection(text, 'https://linkedin.com/in/michaelchen');
+      expect(result.name).toBe('Michael Chen');
+      expect(result.name).not.toContain('Senior');
+    });
+
+    it('handles name with verification badge text', () => {
+      const text = `Jane Smith ✓ Marketing Director | Growth Strategy`;
+      const result = parseSelection(text, 'https://linkedin.com/in/janesmith');
+      expect(result.name).toBe('Jane Smith');
+    });
+
+    it('handles name followed by helping verb', () => {
+      const text = `Alex Turner Helping founders build better products`;
+      const result = parseSelection(text, 'https://linkedin.com/in/alexturner');
+      expect(result.name).toBe('Alex Turner');
+      expect(result.name).not.toContain('Helping');
+    });
+  });
+
+  describe('International phone numbers', () => {
+    it('extracts German phone number', () => {
+      const text = `Telefon: +49 30 12345678`;
+      const result = parseSelection(text, 'https://firma.de');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('extracts UK phone number', () => {
+      const text = `Phone: +44 20 7946 0958`;
+      const result = parseSelection(text, 'https://company.co.uk');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('extracts French phone number', () => {
+      const text = `Téléphone: +33 1 23 45 67 89`;
+      const result = parseSelection(text, 'https://entreprise.fr');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('extracts Australian phone number', () => {
+      const text = `Call us: +61 2 9876 5432`;
+      const result = parseSelection(text, 'https://company.com.au');
+      expect(result.phone).toBeTruthy();
+    });
+  });
+
+  describe('Auto-detection from source URL', () => {
+    it('auto-fills LinkedIn URL from source', () => {
+      const text = `John Doe - Software Engineer`;
+      const result = parseSelection(text, 'https://linkedin.com/in/johndoe');
+      expect(result.linkedIn).toBe('https://linkedin.com/in/johndoe');
+    });
+
+    it('auto-fills website URL from regular site', () => {
+      const text = `Contact us for more info`;
+      const result = parseSelection(text, 'https://acmecorp.com/contact');
+      expect(result.website).toBe('https://acmecorp.com/contact');
+    });
+
+    it('does NOT auto-fill website from Twitter', () => {
+      const text = `Tech enthusiast and developer`;
+      const result = parseSelection(text, 'https://twitter.com/johndoe');
+      expect(result.website).toBeUndefined();
+    });
+
+    it('auto-fills website from GitHub profile', () => {
+      const text = `Open source contributor`;
+      const result = parseSelection(text, 'https://github.com/johndoe');
+      expect(result.website).toBe('https://github.com/johndoe');
+    });
+
+    it('strips query params from LinkedIn URL', () => {
+      const text = `Jane Smith - Product Manager`;
+      const result = parseSelection(text, 'https://linkedin.com/in/janesmith?utm_source=share');
+      expect(result.linkedIn).toBe('https://linkedin.com/in/janesmith');
+    });
+  });
+
+  describe('Business name extraction', () => {
+    it('extracts business name with ampersand', () => {
+      const text = `Smith & Associates Law Firm
+        (555) 123-4567`;
+      const result = parseSelection(text, 'https://smithlaw.com');
+      expect(result.name).toContain('Smith');
+    });
+
+    it('extracts business name with possessive', () => {
+      const text = `McDonald's Restaurant
+        Open 24 hours
+        (555) 999-8888`;
+      const result = parseSelection(text, 'https://mcdonalds.com');
+      expect(result.name).toContain("McDonald's");
+    });
+
+    it('extracts company with Inc/LLC suffix', () => {
+      const text = `Company: TechStartup Inc.
+        CEO: John Founder
+        john@techstartup.com`;
+      const result = parseSelection(text, 'https://techstartup.com');
+      expect(result.company).toContain('TechStartup Inc.');
+    });
+  });
+
+  describe('Email edge cases', () => {
+    it('extracts email with long TLD', () => {
+      const text = `Contact: info@company.technology`;
+      const result = parseSelection(text, 'https://company.technology');
+      expect(result.email).toBe('info@company.technology');
+    });
+
+    it('extracts email with numbers', () => {
+      const text = `sales2024@company123.com`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.email).toBe('sales2024@company123.com');
+    });
+
+    it('extracts email with dots before @', () => {
+      const text = `john.doe.smith@company.com`;
+      const result = parseSelection(text, 'https://company.com');
+      expect(result.email).toBe('john.doe.smith@company.com');
+    });
+
+    it('ignores invalid email-like text', () => {
+      const text = `See our @ pricing page for details`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.email).toBeUndefined();
+    });
+  });
+
+  describe('Empty and malformed input', () => {
+    it('handles empty string', () => {
+      const result = parseSelection('', 'https://example.com');
+      expect(result.name).toBe('Unnamed Lead');
+      expect(result.sourceUrl).toBe('https://example.com');
+    });
+
+    it('handles whitespace only', () => {
+      const result = parseSelection('   \n\t  ', 'https://example.com');
+      expect(result.name).toBeTruthy();
+    });
+
+    it('handles very long text', () => {
+      const longText = 'John Doe ' + 'lorem ipsum '.repeat(1000);
+      const result = parseSelection(longText, 'https://example.com');
+      expect(result.name).toBe('John Doe');
+      expect(result.name.length).toBeLessThan(150);
+    });
+
+    it('handles special characters only', () => {
+      const result = parseSelection('!@#$%^&*()', 'https://example.com');
+      expect(result.name).toBeTruthy();
+      expect(result.sourceUrl).toBe('https://example.com');
+    });
+
+    it('handles emoji in text', () => {
+      const text = `🚀 John Smith - Entrepreneur
+        john@startup.io`;
+      const result = parseSelection(text, 'https://startup.io');
+      expect(result.name).toBe('John Smith');
+      expect(result.email).toBe('john@startup.io');
+    });
+  });
 });
