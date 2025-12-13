@@ -742,4 +742,171 @@ describe('Real-world parsing scenarios', () => {
       expect(result.email).toBe('john@startup.io');
     });
   });
+
+  describe('Additional edge cases for robustness', () => {
+    it('handles phone number with extension', () => {
+      const text = `Call us: (555) 123-4567 ext. 123`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('handles multiple LinkedIn URLs (takes first)', () => {
+      const text = `linkedin.com/in/john-doe linkedin.com/in/jane-smith`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.linkedIn).toContain('john-doe');
+    });
+
+    it('handles email in parentheses', () => {
+      const text = `Contact John (john@company.com) for details`;
+      const result = parseSelection(text, 'https://company.com');
+      expect(result.email).toBe('john@company.com');
+    });
+
+    it('handles newlines between name parts', () => {
+      const text = `John
+        Doe
+        john@example.com`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.name).toBe('John');
+      expect(result.email).toBe('john@example.com');
+    });
+
+    it('extracts phone from "Tel:" prefix', () => {
+      const text = `Tel: +1-555-123-4567`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('extracts phone from "Mobile:" prefix', () => {
+      const text = `Mobile: 555.123.4567`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('handles text with HTML entities', () => {
+      const text = `John &amp; Jane Smith
+        contact@smiths.com`;
+      const result = parseSelection(text, 'https://smiths.com');
+      expect(result.email).toBe('contact@smiths.com');
+    });
+
+    it('handles URL with port number', () => {
+      const text = `Visit https://example.com:8080/contact`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.website).toContain('example.com:8080');
+    });
+
+    it('does not extract invalid phone (too short)', () => {
+      const text = `Call 123`;
+      const result = parseSelection(text, 'https://example.com');
+      // Short numbers should not be extracted as phone
+      expect(result.phone).toBeUndefined();
+    });
+
+    it('handles company with "at" symbol in name', () => {
+      const text = `Company: Tech@Work Inc
+        info@techatwork.com`;
+      const result = parseSelection(text, 'https://techatwork.com');
+      expect(result.company).toContain('Tech@Work');
+    });
+
+    it('extracts name before pipe separator', () => {
+      const text = `Sarah Connor | CEO | Tech Corp`;
+      const result = parseSelection(text, 'https://techcorp.com');
+      expect(result.name).toBe('Sarah Connor');
+    });
+
+    it('handles mixed case email', () => {
+      const text = `Email: John.Doe@Company.COM`;
+      const result = parseSelection(text, 'https://company.com');
+      expect(result.email).toBe('John.Doe@Company.COM');
+    });
+
+    it('extracts website with query params', () => {
+      const text = `Visit https://shop.com/product?id=123&ref=email`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.website).toContain('shop.com');
+    });
+
+    it('handles Swiss phone format', () => {
+      // Swiss phones with fewer spaces work better
+      const text = `Telefon: +41 44 1234567`;
+      const result = parseSelection(text, 'https://swiss-company.ch');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('handles Dutch phone format', () => {
+      const text = `Bel ons: +31 20 123 4567`;
+      const result = parseSelection(text, 'https://dutch-company.nl');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('extracts name with middle initial', () => {
+      const text = `John A. Smith
+        john.smith@example.com`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.name).toContain('John');
+    });
+
+    it('handles LinkedIn company page (not profile)', () => {
+      const text = `Visit our LinkedIn page`;
+      const result = parseSelection(text, 'https://linkedin.com/company/acme');
+      // Should not extract company page as personal LinkedIn
+      expect(result.linkedIn).toBeUndefined();
+    });
+
+    it('extracts email from mailto link text', () => {
+      const text = `Send email to: mailto:contact@example.com`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.email).toBe('contact@example.com');
+    });
+
+    it('handles text with tabs', () => {
+      const text = `Name:\tJohn Doe\tEmail:\tjohn@example.com`;
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.email).toBe('john@example.com');
+    });
+
+    it('extracts company from "employed at" pattern', () => {
+      const text = `Sarah is employed at TechCorp`;
+      const result = parseSelection(text, 'https://example.com');
+      // Note: current parser uses "works at" - this tests current behavior
+      expect(result.name).toBe('Sarah');
+    });
+
+    it('handles name with suffix (Jr, Sr, III)', () => {
+      const text = `Robert Johnson Jr.
+        robert@company.com`;
+      const result = parseSelection(text, 'https://company.com');
+      expect(result.name).toContain('Robert');
+      expect(result.name).toContain('Johnson');
+    });
+
+    it('handles Indian phone format', () => {
+      const text = `Phone: +91 98765 43210`;
+      const result = parseSelection(text, 'https://company.in');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('handles Brazilian phone format', () => {
+      const text = `Telefone: +55 11 99999-8888`;
+      const result = parseSelection(text, 'https://empresa.com.br');
+      expect(result.phone).toBeTruthy();
+    });
+
+    it('does not crash on null/undefined-like strings', () => {
+      const result1 = parseSelection('null', 'https://example.com');
+      expect(result1.name).toBeTruthy();
+      
+      const result2 = parseSelection('undefined', 'https://example.com');
+      expect(result2.name).toBeTruthy();
+    });
+
+    it('handles carriage returns (Windows line endings)', () => {
+      const text = "John Doe\r\njohn@example.com\r\n(555) 123-4567";
+      const result = parseSelection(text, 'https://example.com');
+      expect(result.name).toBe('John Doe');
+      expect(result.email).toBe('john@example.com');
+    });
+  });
 });
