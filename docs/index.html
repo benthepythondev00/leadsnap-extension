@@ -150,94 +150,72 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
             </div>
-            <h1>Privacy Policy</h1>
-            <p class="updated">LeadSnap Chrome Extension • Last Updated: October 2026</p>
+        <h1>Privacy Policy</h1>
+        <p class="updated">LeadSnap Chrome Extension • Last updated: November 2, 2026</p>
         </header>
-        
         <main>
-            <h2>Overview</h2>
-            <p>LeadSnap ("the Extension") is a Chrome browser extension that helps freelancers capture and manage leads from websites. This Privacy Policy explains how we handle your data.</p>
-            
-            <div class="highlight">
-                <p><strong>Key Point:</strong> All your data is stored locally on your device. We never collect, transmit, or have access to your leads or any personal information.</p>
-            </div>
-            
-            <h2>Data Collection and Storage</h2>
-            
-            <h3>What Data We Store</h3>
-            <p>The Extension stores the following information that <strong>you choose to save</strong>:</p>
-            <ul>
-                <li>Lead names</li>
-                <li>Email addresses</li>
-                <li>Phone numbers</li>
-                <li>Company names</li>
-                <li>LinkedIn profile URLs</li>
-                <li>Website URLs</li>
-                <li>Notes you add</li>
-                <li>Tags you assign</li>
-                <li>Lead status (New, Contacted, Proposal, Won, Lost)</li>
-                <li>Source URLs (the webpage where you captured the lead)</li>
-            </ul>
-            
-            <h3>How Data is Stored</h3>
-            <p><strong>All data is stored locally on your device</strong> using Chrome's built-in storage API (<code>chrome.storage.local</code>). Your lead data:</p>
-            <ul>
-                <li>Never leaves your browser</li>
-                <li>Is not sent to any external servers</li>
-                <li>Is not shared with any third parties</li>
-                <li>Is not accessible to us or anyone else</li>
-            </ul>
-            
-            <h3>Data You Control</h3>
-            <p>You have complete control over your data:</p>
-            <ul>
-                <li>View all stored leads in the Extension popup</li>
-                <li>Edit or delete individual leads at any time</li>
-                <li>Export your data as CSV or JSON files</li>
-                <li>Uninstalling the extension removes all stored data</li>
-            </ul>
-            
-            <h2>Permissions We Request</h2>
-            <p>The Extension requests the following permissions:</p>
-            <ol>
-                <li><strong>storage</strong>: To save your leads locally in Chrome's storage</li>
-                <li><strong>contextMenus</strong>: To add "Add to LeadSnap" option when you right-click selected text</li>
-                <li><strong>activeTab</strong>: To read selected text and page URL when you capture a lead</li>
-                <li><strong>notifications</strong>: To confirm a saved lead and, in Pro, to remind you of a follow-up</li>
-                <li><strong>alarms</strong>: To show a Pro follow-up reminder at the date and time you set on a lead</li>
-            </ol>
-            <p>Follow-up dates, deal values and addresses you enter are stored with the lead in your browser only, like every other lead field.</p>
-            
-            <h2>Data Sharing</h2>
-            <p>We do <strong>NOT</strong>:</p>
-            <ul>
-                <li>Collect any analytics or usage data</li>
-                <li>Send any data to external servers</li>
-                <li>Share your data with third parties</li>
-                <li>Track your browsing activity</li>
-                <li>Access any data other than what you explicitly choose to capture</li>
-            </ul>
-            
-            <h2>Third-Party Services</h2>
-            <p>The free version of LeadSnap does not use any third-party services.</p>
-            <p>LeadSnap Pro is sold through ExtensionPay (extensionpay.com), which uses Stripe for payment processing. The extension asks ExtensionPay only whether you bought Pro. Stripe's privacy policy applies to payment data: <a href="https://stripe.com/privacy" target="_blank" rel="noopener">stripe.com/privacy</a></p>
-            
-            <h2>Children's Privacy</h2>
-            <p>LeadSnap is not intended for use by children under 13 years of age. We do not knowingly collect data from children.</p>
-            
-            <h2>Changes to This Policy</h2>
-            <p>We may update this Privacy Policy from time to time. We will notify users of any material changes by updating the "Last Updated" date at the top of this page.</p>
-            
-            <h2>Your Rights</h2>
-            <p>Depending on your location, you may have rights under GDPR, CCPA, or other privacy laws. Since all data is stored locally on your device and we have no access to it, you can exercise all data rights directly through the Extension's interface.</p>
-            
-            <h2>Contact</h2>
-            <p>If you have questions about this Privacy Policy, please contact us at:</p>
-            <p><strong>Email:</strong> <a href="mailto:benthepythondev0@gmail.com">benthepythondev0@gmail.com</a></p>
+
+        <h2>Who we are</h2>
+        <p>LeadSnap (Lead Capture &amp; Simple CRM for Freelancers) is a Chrome extension made by Ben, an independent developer. You can find it on the <a href="https://chromewebstore.google.com/detail/gbcdideigiiielaaiddamlbdomncabfk">Chrome Web Store</a>.</p>
+
+        <div class="highlight">
+            <p><strong>In short:</strong> your leads stay in your browser. We have no server, no account system and no access to them.</p>
+        </div>
+
+        <h2>What we collect</h2>
+        <p>LeadSnap stores the following in your browser using Chrome's local storage (<strong>chrome.storage.local</strong>):</p>
+        <ul>
+            <li><strong>Leads you save:</strong> name, email address, phone number, company, LinkedIn profile URL, website URL, address, deal value, follow-up date, notes, tags, status (New, Contacted, Proposal, Won, Lost) and the source URL of the page you captured it from.</li>
+            <li><strong>Settings:</strong> your preferences, including when you last exported a backup.</li>
+            <li><strong>leadsSaved counter:</strong> a number counting the leads you have saved.</li>
+            <li><strong>reviewAsk flag:</strong> records whether you answered the "rate LeadSnap" prompt ("later" or "done"). The prompt appears after your 5th saved lead, and once more at 25 if you chose "Not now". Then it stops.</li>
+        </ul>
+        <p>All of this stays on your device. Nothing is stored in sync storage or on a server of ours. We do not use analytics, ads or tracking.</p>
+
+        <h2>Why we collect it</h2>
+        <ul>
+            <li>Your leads and settings are stored so the extension can show, organize, export and remind you about them.</li>
+            <li>The leadsSaved counter and the reviewAsk flag make sure the rating prompt shows at most twice and then stops.</li>
+        </ul>
+
+        <h2>Permissions</h2>
+        <ul>
+            <li><strong>storage:</strong> to keep your data in your browser.</li>
+            <li><strong>contextMenus:</strong> to add the "Add to LeadSnap" right-click option.</li>
+            <li><strong>activeTab:</strong> to read the selected text and page URL when you capture a lead.</li>
+            <li><strong>notifications and alarms:</strong> to confirm a saved lead and, in Pro, to remind you of a follow-up at the time you set.</li>
+            <li><strong>extensionpay.com access:</strong> so the extension can check whether you bought Pro.</li>
+        </ul>
+
+        <h2>Sharing</h2>
+        <p>Your leads, settings, counter and flag are never sent anywhere. Nobody receives them, including us.</p>
+        <p>LeadSnap Pro is sold through ExtensionPay (extensionpay.com), which uses Stripe for payments. The extension asks ExtensionPay only whether you bought Pro. Payment details go to Stripe, not to us; see <a href="https://stripe.com/privacy">stripe.com/privacy</a>. The free version uses no third-party service. The Chrome Web Store handles installs and updates under Google's own policies.</p>
+        <p>We do not sell your data.</p>
+
+        <h2>How long we keep it</h2>
+        <p>Your leads, settings, counter and flag stay in your browser until you delete them or remove LeadSnap. Removing the extension deletes all of it.</p>
+
+        <h2>Your rights</h2>
+        <ul>
+            <li><strong>Access:</strong> you can view all your leads in the extension popup and export them as CSV or JSON.</li>
+            <li><strong>Deletion:</strong> delete single leads at any time, use "Clear all leads" in Settings, or uninstall LeadSnap.</li>
+            <li><strong>Contact:</strong> for any privacy question or request, email us at the address below.</li>
+        </ul>
+        <p>Because we hold no copy of your data, you can exercise your rights under GDPR, CCPA or similar laws directly in the extension.</p>
+
+        <h2>Children</h2>
+        <p>LeadSnap is a tool for freelancers and is not directed at children under 13. We do not knowingly collect data from children, and we hold no data at all, since everything stays in the user's own browser.</p>
+
+        <h2>Changes to this policy</h2>
+        <p>If LeadSnap's data use changes, we will update this page and change the "Last updated" date at the top.</p>
+
+        <h2>Contact</h2>
+        <p>Ben, developer of LeadSnap<br>Email: <a href="mailto:benthepythondev0@gmail.com">benthepythondev0@gmail.com</a><br>Policy page: <a href="https://benthepythondev00.github.io/leadsnap-extension/">https://benthepythondev00.github.io/leadsnap-extension/</a></p>
+
         </main>
-        
+
         <footer>
-            <p>&copy; 2025 LeadSnap. All rights reserved.</p>
+            <p>&copy; 2026 LeadSnap.</p>
             <p><a href="https://github.com/benthepythondev00/leadsnap-extension">View on GitHub</a></p>
         </footer>
     </div>
